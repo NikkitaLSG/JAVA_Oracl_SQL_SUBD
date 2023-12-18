@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import NikitaLSG.*;
 
 
 public class Interface {
@@ -16,7 +17,6 @@ public class Interface {
     private String password;
     private JList<String> tableList;
     private JTable resultTable;
-
     public Interface(String host, String service, String user, String password) {
         this.host = host;
         this.service = service;
@@ -91,7 +91,6 @@ public class Interface {
                     JButton addButton = new JButton("Добавить");
                     panel2.add(addButton);
 
-
                     addButton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -112,7 +111,7 @@ public class Interface {
                             try {
                                 Statement statement = connection.createStatement();
                                 StringBuilder queryBuilder = new StringBuilder();
-                                queryBuilder.append("INSERT INTO ").append(selectedTable).append(" VALUES (DEFAULT, ");
+                                queryBuilder.append("INSERT INTO " + "STUD.").append(selectedTable).append(" VALUES (DEFAULT, ");
                                 for (int columnIndex = 1; columnIndex < tableModel.getColumnCount(); columnIndex++) {
                                     Object cellValue = newRow[columnIndex];
                                     if (cellValue instanceof String) {
@@ -131,8 +130,6 @@ public class Interface {
                             }
                         }
                     });
-
-
 
                     JTable table = new JTable();
                     table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -235,10 +232,60 @@ public class Interface {
                     });
                     changeButton.addActionListener(new ChangingData(tableList, resultTable));
 
+                    JButton timeButton = new JButton("Время_ПРИХ");
+                    panel2.add(timeButton);
+
+                    timeButton.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            String selectedTable = tableList.getSelectedValue();
+                            if (selectedTable != null) {
+                                // Создание нового окна для ввода времени прихода и ухода
+                                JFrame timeFrame = new JFrame("Время прихода и ухода");
+                                timeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                timeFrame.setSize(300, 200);
+
+                                JPanel timePanel = new JPanel();
+                                timeFrame.add(timePanel);
+
+                                // Создание элементов управления для ввода времени прихода и ухода
+                                JLabel timePrichLabel = new JLabel("Время прихода:");
+                                JTextField timePrichField = new JTextField(10);
+
+                                JLabel timeUkhodLabel = new JLabel("Время ухода:");
+                                JTextField timeUkhodField = new JTextField(10);
+
+                                JButton saveButton = new JButton("Сохранить");
+
+                                // Добавление элементов управления на панель
+                                timePanel.add(timePrichLabel);
+                                timePanel.add(timePrichField);
+                                timePanel.add(timeUkhodLabel);
+                                timePanel.add(timeUkhodField);
+                                timePanel.add(saveButton);
+
+
+                                saveButton.addActionListener(new ActionListener() {
+                                    public void actionPerformed(ActionEvent e) {
+                                        String timePrich = timePrichField.getText();
+                                        String timeUkhod = timeUkhodField.getText();
+                                        TimePrichData timePrichData = new TimePrichData();
+                                        timePrichData.saveTimePrich(selectedTable, timePrich, timeUkhod);
+
+                                        timeFrame.dispose();
+                                    }
+                                });
+
+                                timeFrame.setVisible(true);
+                            }
+                        }
+                    });
+
                     panel2.revalidate();
                     panel2.repaint();
 
                     newFrame.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Заполните все поля!");
                 }
             }
         });
@@ -246,10 +293,8 @@ public class Interface {
         frame.setVisible(true);
     }
 
-    public void setVisible(boolean b) {
-    }
     public static void main(String[] args) {
-        Interface interfaceObj = new Interface("", "", "", "");
-        interfaceObj.createUI();
+        Interface ui = new Interface("host", "service", "user", "password");
+        ui.createUI();
     }
 }

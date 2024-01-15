@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Interface {
-    private String host;
+    private final String host;
     private String service;
     private String user;
     private String password;
@@ -24,7 +24,6 @@ public class Interface {
         this.user = user;
         this.password = password;
     }
-
     public void createUI() {
 
         JFrame frame = new JFrame("СУБД");
@@ -90,55 +89,48 @@ public class Interface {
                     JButton changeButton = new JButton("Изменить");
                     panel2.add(changeButton);
 
-
                     JButton addButton = new JButton("Добавить");
                     panel2.add(addButton);
-                    // Добавляем текстовое поле для SQL команд после кнопки Войти
+
                     JLabel sqlInputLabel = new JLabel("SQL Команда:");
                     panel2.add(sqlInputLabel);
-                    JTextArea sqlInputArea = new JTextArea(3, 30); // Высота 3 строки, ширина 30 столбцов
+
+                    JTextArea sqlInputArea = new JTextArea(3, 30);
                     sqlInputArea.setLineWrap(true);
+
                     JScrollPane sqlInputScroll = new JScrollPane(sqlInputArea);
                     panel2.add(sqlInputScroll);
 
-// Добавляем кнопку для выполнения команды.
                     JButton executeButton = new JButton("Выполнить");
                     panel2.add(executeButton);
 
-// Добавляем текстовую область для вывода результатов.
                     JTextArea sqlOutputArea = new JTextArea(10, 30);
                     sqlOutputArea.setEditable(false);
                     sqlOutputArea.setWrapStyleWord(true);
+
                     JScrollPane sqlOutputScroll = new JScrollPane(sqlOutputArea);
                     panel2.add(sqlOutputScroll);
                     frame.setVisible(true);
-
-
-
-                            executeButton.addActionListener(new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    String sql = sqlInputArea.getText(); // Получаем введённую SQL команду
+                    executeButton.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            String sql = sqlInputArea.getText();
                                     Connection connection = null;
                                     Statement statement = null;
                                     try {
                                         connection = connectDB.getConnection();
                                         statement = connection.createStatement();
                                         if (sql.trim().toUpperCase().startsWith("SELECT")) {
-                                            // Выполняем SELECT запрос
+
                                             ResultSet resultSet = statement.executeQuery(sql);
                                             ResultSetMetaData metaData = resultSet.getMetaData();
                                             int columnCount = metaData.getColumnCount();
-
-                                            // Сбрасываем предыдущий результат
                                             sqlOutputArea.setText("");
-
-                                            // Получаем названия колонок
                                             for (int i = 1; i <= columnCount; i++) {
                                                 sqlOutputArea.append(metaData.getColumnLabel(i) + "\t");
                                             }
                                             sqlOutputArea.append("\n");
 
-                                            // Выводим строки результата выборки
+
                                             while (resultSet.next()) {
                                                 for (int i = 1; i <= columnCount; i++) {
                                                     sqlOutputArea.append(resultSet.getString(i) + "\t");
@@ -146,7 +138,7 @@ public class Interface {
                                                 sqlOutputArea.append("\n");
                                             }
                                         } else {
-                                            // Для DML (INSERT, UPDATE, DELETE) и других команд кроме SELECT
+
                                             int result = statement.executeUpdate(sql);
                                             if (result > 0) {
                                                 sqlOutputArea.setText("Запрос успешно выполнен. Затронуто строк: " + result);
@@ -157,7 +149,7 @@ public class Interface {
                                     } catch (SQLException ex) {
                                         sqlOutputArea.setText("Ошибка SQL: " + ex.getMessage());
                                     } finally {
-                                        // Закрываем соединение и statement
+
                                         try {
                                             if (statement != null) statement.close();
                                             if (connection != null) connection.close();
@@ -167,27 +159,17 @@ public class Interface {
                                     }
                                 }
                             });
-
-
-
-
-
-                    addButton.addActionListener(new ActionListener() {
-
+                            addButton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             String selectedTable = tableList.getSelectedValue();
                             DefaultTableModel tableModel = (DefaultTableModel) resultTable.getModel();
                             Object[] newRow = new Object[tableModel.getColumnCount()];
-
-                            // Получаем значения для новой строки из пользовательского интерфейса
                             int lastRowIndex = tableModel.getRowCount();
                             for (int columnIndex = 0; columnIndex < tableModel.getColumnCount(); columnIndex++) {
                                 Object cellValue = tableModel.getValueAt(lastRowIndex - 1, columnIndex);
                                 newRow[columnIndex] = cellValue;
                             }
-
-                            // Выполняем SQL-запрос для добавления новой строки в базу данных
                             Connection connection = connectDB.getConnection();
                             try {
                                 Statement statement = connection.createStatement();
@@ -199,9 +181,6 @@ public class Interface {
                             }
                         }
                     });
-
-
-
                     JTable table = new JTable();
                     table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
                         @Override
@@ -209,17 +188,12 @@ public class Interface {
                             if (!event.getValueIsAdjusting()) {
                                 int selectedRow = table.getSelectedRow();
                                 if (selectedRow != -1) {
-                                    // Получаем данные из выбранной строки и отображаем их в других компонентах вашего интерфейса
                                 }
                             }
                         }
                     });
-
-
-
                     JButton selectTableButton = new JButton("Выбрать таблицу");
                     panel2.add(selectTableButton);
-
                     selectTableButton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
@@ -227,12 +201,10 @@ public class Interface {
                             try {
                                 DatabaseMetaData metaData = connection.getMetaData();
                                 ResultSet tables = metaData.getTables(null, null, null, new String[]{"TABLE"});
-
                                 DefaultListModel<String> tableListModel = new DefaultListModel<>();
                                 tableList = new JList<>(tableListModel);
                                 JScrollPane tableScrollPane = new JScrollPane(tableList);
                                 panel2.add(tableScrollPane);
-
                                 tableList.addListSelectionListener(new ListSelectionListener() {
                                     @Override
                                     public void valueChanged(ListSelectionEvent event) {
@@ -244,12 +216,10 @@ public class Interface {
                                                     resultTable = new JTable(tableModel);
                                                     JScrollPane resultScrollPane = new JScrollPane(resultTable);
                                                     panel2.add(resultScrollPane);
-
                                                     while (columns.next()) {
                                                         String columnName = columns.getString("COLUMN_NAME");
                                                         tableModel.addColumn(columnName);
                                                     }
-
                                                     Statement statement = connection.createStatement();
                                                     ResultSet resultSet = statement.executeQuery(" SELECT * FROM " +"e1144610."+"\"" + selectedTable + "\"");
                                                     ResultSetMetaData rsMetaData = resultSet.getMetaData();
@@ -262,7 +232,6 @@ public class Interface {
                                                         }
                                                         tableModel.addRow(rowData);
                                                     }
-
                                                     panel2.revalidate();
                                                     panel2.repaint();
                                                 } catch (SQLException ex) {
@@ -272,12 +241,10 @@ public class Interface {
                                         }
                                     }
                                 });
-
                                 while (tables.next()) {
                                     String tableName = tables.getString("TABLE_NAME");
                                     tableListModel.addElement(tableName);
                                 }
-
                                 panel2.revalidate();
                                 panel2.repaint();
                             } catch (SQLException ex) {
@@ -285,26 +252,18 @@ public class Interface {
                             }
                         }
                     });
-
-
                     delButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             int selectedRow = resultTable.getSelectedRow();
                             if (selectedRow != -1) {
                                 String selectedTable = tableList.getSelectedValue();
                                 if (selectedTable != null) {
-                                    // Получение значения первичного ключа, предполагая, что первый столбец - это первичный ключ
                                     Object primaryKeyValue = resultTable.getValueAt(selectedRow, 0);
-
-                                    // Выполнение SQL-запроса DELETE
                                     Connection connection = connectDB.getConnection();
                                     try {
                                         Statement statement = connection.createStatement();
-                                        // Убедитесь, что имя столбца без кавычек и в правильном регистре
                                         String deleteQuery = "DELETE FROM e1144610." +"\"" + selectedTable +"\"" + " WHERE " +"ID_СОТРУДИКА"+ " = " + primaryKeyValue;
                                         statement.executeUpdate(deleteQuery);
-
-                                        // Удаление строки из модели таблицы
                                         DefaultTableModel tableModel = (DefaultTableModel) resultTable.getModel();
                                         tableModel.removeRow(selectedRow);
                                     } catch (SQLException ex) {
@@ -314,12 +273,9 @@ public class Interface {
                             }
                         }
                     });
-
                     changeButton.addActionListener(new ChangingData(tableList, resultTable));
-
                     JButton timeButton = new JButton("Время_ПРИХ");
                     panel2.add(timeButton);
-
                     timeButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String selectedTable = tableList.getSelectedValue();
@@ -345,8 +301,6 @@ public class Interface {
                                 JLabel countLateLabel = new JLabel("КоличествоОпозданий:");
                                 JTextField countLateField = new JTextField(10);
 
-                                // Removed unnecessary timeField, idVremyaField, and generateUniqueId()
-
                                 JButton countLateButton = new JButton("Посчитать опоздания");
                                 timePanel.add(countLateButton);
                                 timePanel.add(idSotrudnikaLabel);
@@ -360,8 +314,6 @@ public class Interface {
 
                                 timePanel.add(timeUkhodLabel);
                                 timePanel.add(timeUkhodField);
-
-
                                 countLateButton.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
@@ -370,34 +322,29 @@ public class Interface {
                                         countLateField.setText(String.valueOf(countLate));
                                     }
                                 });
-
                                 increaseButton.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        // Увеличить время ухода на 1
+
                                         int timeUkhod = Integer.parseInt(Objects.requireNonNull(timeUkhodField.getText()));
                                         timeUkhod++;
                                         timeUkhodField.setText(String.valueOf(timeUkhod));
                                     }
                                 });
-
                                 JButton saveButton = new JButton("Сохранить");
                                 timePanel.add(saveButton);
 
                                 saveButton.addActionListener(new ActionListener() {
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        // Логика кнопки сохранения
                                     }
                                 });
-
                                 class TimePrichData {
                                     public int saveTimePrich(String tableName, int idSotrudnika, int countLate, String timePrich, String timeUkhod) {
-                                        // Генерация уникального идентификатора для записи в таблице
+                                        //Генератор
                                         UUID uuid = UUID.randomUUID();
                                         int idVremya = Math.abs(uuid.hashCode());
 
-                                        // Выполнение SQL-запроса для добавления новой записи в таблицу
                                         Connection connection = connectDB.getConnection();
                                         try {
                                             Statement statement = connection.createStatement();
@@ -408,13 +355,9 @@ public class Interface {
                                         } catch (SQLException ex) {
                                             ex.printStackTrace();
                                         }
-
                                         return idVremya;
                                     }
                                 }
-
-
-
                                     saveButton.addActionListener(new ActionListener() {
                                         public void actionPerformed(ActionEvent e) {
                                             try {
@@ -422,25 +365,20 @@ public class Interface {
                                                 int countLate = Integer.parseInt(countLateField.getText());
                                                 String timePrich = timePrichField.getText();
                                                 String timeUkhod = timeUkhodField.getText();
-
                                                 TimePrichData timePrichData = new TimePrichData();
                                                 int idVremya = timePrichData.saveTimePrich(selectedTable, idSotrudnika, countLate, timePrich, timeUkhod);
-
                                                 timeFrame.dispose();
                                             } catch (NumberFormatException ex) {
                                                 JOptionPane.showMessageDialog(timeFrame, "Введите корректные числовые значения.");
                                             }
                                         }
                                     });
-
                                 timeFrame.setVisible(true);
                             }
                         }
                     });
-
                     panel2.revalidate();
                     panel2.repaint();
-
                     newFrame.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Заполните все поля!");
@@ -448,11 +386,8 @@ public class Interface {
             }
 
         });
-
-
         frame.setVisible(true);
     }
-
     public static void main(String[] args) {
         Interface ui = new Interface("host", "service", "user", "password");
         ui.createUI();

@@ -22,7 +22,7 @@ public class DeletingData {
         }
     }
 
-    public void deleteData(String selectedTable, String columnName, Object valueToDelete) {
+    public void deleteData(String selectedTable, Object valueToDelete) {
         // Ваш код для удаления данных из базы данных
     }
 }

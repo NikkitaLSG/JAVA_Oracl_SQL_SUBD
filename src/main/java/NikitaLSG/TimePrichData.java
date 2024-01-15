@@ -31,5 +31,18 @@ public class TimePrichData {
     }
 
     public void saveTimePrich(String selectedTable, String timePrich, String timeUkhod) {
+        try {
+            Statement statement = connection.createStatement();
+            String query = "UPDATE "+ "E1141379." + selectedTable +
+                    " SET Время_Прихода = '" + timePrich + "', Время_Ухода = '" + timeUkhod + "'";
+            statement.executeUpdate(query);
+
+            System.out.println("Данные успешно сохранены.");
+
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
 }
